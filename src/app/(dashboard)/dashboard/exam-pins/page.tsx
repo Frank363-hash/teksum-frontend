@@ -1,0 +1,2 @@
+import { ProviderGrid } from "@/components/teksum/service-discovery"
+export default function Page(){return <div className="teksum-dashboard-page min-w-0 w-full flex flex-1 flex-col gap-6"><div><p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-500">Education</p><h1 className="mt-2 text-3xl font-black tracking-tight">Choose an examination body.</h1><p className="mt-2 text-sm text-muted-foreground">Each body has its own products and purchase rules.</p></div><ProviderGrid type="education" basePath="/dashboard/exam-pins" /></div>}
