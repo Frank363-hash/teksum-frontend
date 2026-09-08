@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   openGraph: {
-    title: "TEKSUM — Data, Airtime, Bills & Exam PINs",
+    title: "TEKSUM Data, Airtime, Bills & Exam PINs",
     description:
       "Buy data, airtime, exam PINs and supported Nigerian bills through TEKSUM.",
     type: "website",
@@ -58,7 +58,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "TEKSUM — Data, Airtime, Bills & Exam PINs",
+    title: "TEKSUM Data, Airtime, Bills & Exam PINs",
     description:
       "Buy data, airtime, exam PINs and supported Nigerian bills through TEKSUM.",
   },
