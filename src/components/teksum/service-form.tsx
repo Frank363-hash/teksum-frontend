@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { educationProviders as educationProviderCatalog } from "@/components/teksum/service-discovery";
 import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -442,11 +443,10 @@ export function ServiceForm({
       examPinsIndex >= 0 && segments.length > examPinsIndex + 2
         ? segments[examPinsIndex + 2]
         : null;
-    const target = educationProviders.find(([value]) => value === provider);
+    const target = educationProviderCatalog.find((entry) => entry.slug === provider);
     const keepsCurrentProduct =
       Boolean(productSlug) &&
-      Boolean(target?.[0]) &&
-      target?.[2]?.some(([slug]) => slug === productSlug);
+      Boolean(target?.products.some(([slug]) => slug === productSlug));
 
     return keepsCurrentProduct && productSlug
       ? `/dashboard/exam-pins/${provider}/${productSlug}`
