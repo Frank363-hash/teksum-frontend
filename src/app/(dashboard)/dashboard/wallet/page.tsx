@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
+  apiFetch,
   customerMessage,
   formatNaira,
   getWallet,
@@ -64,6 +65,51 @@ export default function Page() {
     amount: string;
     fee: string;
   } | null>(null);
+
+  useEffect(() => {
+    if (!withdrawResult?.reference || withdrawResult.status !== "PENDING") {
+      return;
+    }
+
+    let cancelled = false;
+
+    const checkWithdrawalStatus = async () => {
+      try {
+        const transaction = await apiFetch<{ status: string }>(
+          `/transactions/${encodeURIComponent(withdrawResult.reference)}`,
+        );
+
+        if (cancelled) return;
+
+        const status = String(transaction.status).toUpperCase();
+
+        if (status !== "PENDING") {
+          setWithdrawResult((current) =>
+            current
+              ? {
+                  ...current,
+                  status,
+                }
+              : current,
+          );
+          await refreshWallet();
+        }
+      } catch {
+        // Keep the existing pending state and retry on the next interval.
+      }
+    };
+
+    void checkWithdrawalStatus();
+
+    const interval = window.setInterval(() => {
+      void checkWithdrawalStatus();
+    }, 5000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [withdrawResult?.reference, withdrawResult?.status]);
 
   async function refreshWallet() {
     try {
