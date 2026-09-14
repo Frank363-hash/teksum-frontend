@@ -5,7 +5,7 @@ import type { FormEvent } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { educationProviders as educationProviderCatalog } from "@/components/teksum/service-discovery";
-import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Loader2, ShieldCheck, MailCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -258,6 +258,7 @@ export function ServiceForm({
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [hasPin, setHasPin] = useState<boolean | null>(null);
   const [profilePhone, setProfilePhone] = useState("");
+  const [profileEmail, setProfileEmail] = useState("");
   const [network, setNetwork] = useState(
     category === "ELECTRICITY"
       ? ""
@@ -271,7 +272,7 @@ export function ServiceForm({
   const [plans, setPlans] = useState<Plan[]>([]);
   const [planId, setPlanId] = useState(initialPlanId || "");
   const [beneficiaryPhone, setBeneficiaryPhone] = useState("");
-  const [amount, setAmount] = useState(500);
+  const [amount, setAmount] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [pin, setPin] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
@@ -284,6 +285,7 @@ export function ServiceForm({
   const [loading, setLoading] = useState(false);
   const [loadingPlans, setLoadingPlans] = useState(false);
   const [message, setMessage] = useState("");
+  const [verificationRequired, setVerificationRequired] = useState(false);
   const [status, setStatus] = useState("");
   const [capabilities, setCapabilities] = useState<unknown[]>([]);
   const [rule, setRule] = useState<Rule | null>(null);
@@ -309,6 +311,7 @@ export function ServiceForm({
       .then(async (profile) => {
         setAuthenticated(true);
         setProfilePhone(profile.phone || "");
+        setProfileEmail(profile.email || "");
         setHasPin(profile.hasTransactionPin);
         try {
           const security = await getSecurity();
@@ -467,9 +470,13 @@ export function ServiceForm({
     dynamicAmount || category === "AIRTIME" || category === "ELECTRICITY";
   const dynamicMin = Number(rule?.minAmount ?? 50);
   const dynamicMax = Number(rule?.maxAmount ?? 100000);
+  const amountValue = Number(amount);
   const estimatedTotal =
-    dynamic && rule
-      ? amount * (1 + Number(rule.markupPercent) / 100) + Number(rule.fixedFee)
+    dynamic
+      ? amount !== "" && rule
+        ? amountValue * (1 + Number(rule.markupPercent) / 100) +
+          Number(rule.fixedFee)
+        : null
       : Number(selected?.sellingPrice || 0) * quantity;
 
   function validate() {
@@ -522,7 +529,7 @@ export function ServiceForm({
 
     if (
       dynamic &&
-      (!Number.isFinite(amount) || amount < dynamicMin || amount > dynamicMax)
+      (!Number.isFinite(amountValue) || amountValue < dynamicMin || amountValue > dynamicMax)
     ) {
       setMessage(
         `Enter an amount between ${formatNaira(dynamicMin)} and ${formatNaira(dynamicMax)}.`,
@@ -733,7 +740,7 @@ export function ServiceForm({
 
       const result = await purchase({
         planId: dynamic ? "AMOUNT" : planId,
-        ...(dynamic ? { amount } : {}),
+        ...(dynamic ? { amount: amountValue } : {}),
         networkProvider: network,
         // The backend currently requires a phone field on every vending request.
         // For services that are not phone-delivered, this is the authenticated
@@ -748,9 +755,12 @@ export function ServiceForm({
       setStatus(result.status);
       clearActionIdempotencyKey("purchase");
       setMessage("");
+      setVerificationRequired(false);
       setPin("");
       setReview(false);
     } catch (error) {
+      const code = error instanceof ApiError ? error.code : undefined;
+      setVerificationRequired(code === "EMAIL_VERIFICATION_REQUIRED");
       setMessage(
         customerMessage(
           error,
@@ -860,7 +870,7 @@ export function ServiceForm({
     ["Provider", providerLabel],
     [
       dynamic ? "Amount" : "Plan",
-      dynamic ? formatNaira(amount) : selected?.planName || "—",
+      dynamic ? formatNaira(amountValue) : selected?.planName || "—",
     ],
   ];
 
@@ -901,7 +911,7 @@ export function ServiceForm({
     "Quantity",
     !dynamic && selected?.supportsBulk ? String(quantity) : "1",
   ]);
-  reviewDetails.push(["Total", formatNaira(estimatedTotal)]);
+  reviewDetails.push(["Total", estimatedTotal === null ? "—" : formatNaira(estimatedTotal)]);
 
   return (
     <Card className="mx-auto w-full min-w-0 max-w-5xl rounded-2xl shadow-sm">
@@ -933,7 +943,7 @@ export function ServiceForm({
             result={purchaseResult}
             title={title}
             planName={dynamic ? "Amount-based service" : selected?.planName || "Selected service"}
-            amount={estimatedTotal}
+            amount={estimatedTotal ?? 0}
             beneficiary={
               needsBeneficiaryPhone
                 ? maskSensitiveIdentifier(beneficiaryPhone)
@@ -1078,7 +1088,8 @@ export function ServiceForm({
                   max={dynamicMax}
                   step="0.01"
                   value={amount}
-                  onChange={(event) => setAmount(Number(event.target.value))}
+                  onChange={(event) => setAmount(event.target.value)}
+                  placeholder="Enter amount"
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
                   Allowed range: {formatNaira(dynamicMin)} –{" "}
@@ -1290,7 +1301,7 @@ export function ServiceForm({
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Estimated total</p>
                 <p className="text-xl font-black">
-                  {formatNaira(estimatedTotal)}
+                  {estimatedTotal === null ? "—" : formatNaira(estimatedTotal)}
                 </p>
               </div>
               <Button
@@ -1320,7 +1331,19 @@ export function ServiceForm({
 
             {message && (
               <div className="rounded-xl border bg-muted/50 p-3 text-sm">
-                {message}
+                <p>{message}</p>
+                {verificationRequired && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="mt-3 gap-1.5"
+                    render={<Link href={`/verify-email?email=${encodeURIComponent(profileEmail || "")}&redirect=${encodeURIComponent(pathname || "/dashboard")}`} />}
+                  >
+                    <MailCheck className="size-3.5" />
+                    Verify email
+                  </Button>
+                )}
               </div>
             )}
           </form>
@@ -1386,10 +1409,29 @@ export function ServiceForm({
               />
             </div>
 
+            {loading && (
+              <div
+                role="status"
+                aria-live="polite"
+                className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[.06] p-4"
+              >
+                <div className="flex items-start gap-3">
+                  <Loader2 className="mt-0.5 size-5 shrink-0 animate-spin text-emerald-500" />
+                  <div className="min-w-0">
+                    <p className="font-semibold">Processing your purchase...</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Your request has been submitted and is being processed. Please wait and do not close or refresh this page.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
                 type="button"
                 variant="outline"
+                disabled={loading}
                 onClick={() => {
                   setReview(false);
                   setPin("");
@@ -1404,7 +1446,10 @@ export function ServiceForm({
                 className="bg-emerald-600 text-white hover:bg-emerald-700"
               >
                 {loading ? (
-                  <Loader2 className="animate-spin" />
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Processing purchase...
+                  </>
                 ) : (
                   "Confirm & purchase"
                 )}

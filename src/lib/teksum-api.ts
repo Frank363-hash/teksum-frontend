@@ -358,6 +358,13 @@ export type FundingAccount = {
 
 export const getFundingAccount = () =>
   apiFetch<FundingAccount>("/wallet/funding/account");
+
+export const reconcileFunding = () =>
+  apiFetch<{
+    status: "NOT_READY" | "CHECKED";
+    requeryRequested: boolean;
+    credited: Array<{ reference: string; amount: number }>;
+  }>("/wallet/funding/reconcile", { method: "POST" });
 export const recordDvaConsent = () =>
   apiFetch<{
     consented: true;

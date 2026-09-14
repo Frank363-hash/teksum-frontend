@@ -78,8 +78,9 @@ export default function ResetPassword() {
   return (
     <main className="min-h-svh min-w-0 overflow-x-clip bg-zinc-950 px-4 py-8 text-white sm:px-5 sm:py-10">
       <div className="mx-auto min-w-0 max-w-md">
-        <Link href="/sign-in" className="font-black">
-          TEKSUM
+        <Link href="/sign-in" className="flex items-center gap-2">
+          <BrandMark />
+          <span className="font-black">TEKSUM</span>
         </Link>
         <div className="mt-16 rounded-3xl border border-white/10 bg-white/[.05] p-7">
           <h1 className="text-3xl font-black">Choose a new password</h1>

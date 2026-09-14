@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   CheckCircle2,
-  ExternalLink,
   Loader2,
   ShieldCheck,
   WalletCards,
@@ -15,13 +14,14 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   apiFetch,
+  ApiError,
   customerMessage,
   formatNaira,
   getWallet,
   getFundingAccount,
   recordDvaConsent,
+  reconcileFunding,
   getWithdrawalBanks,
-  initializeFunding,
   verifyFunding,
   verifyWithdrawalAccount,
   quoteWithdrawal,
@@ -37,10 +37,8 @@ import { useSearchParams } from "next/navigation";
 export default function Page() {
   const params = useSearchParams();
   const [balance, setBalance] = useState("0");
-  const [fundAmount, setFundAmount] = useState(5000);
   const [fundLoading, setFundLoading] = useState(false);
   const [checking, setChecking] = useState(false);
-  const [checkoutUrl, setCheckoutUrl] = useState("");
   const [fundMessage, setFundMessage] = useState("");
   const [fundingAccount, setFundingAccount] = useState<FundingAccount | null>(null);
   const [fundingAccountLoading, setFundingAccountLoading] = useState(false);
@@ -125,6 +123,27 @@ export default function Page() {
     getWithdrawalBanks()
       .then(setBanks)
       .catch(() => setBanks([]));
+
+    let cancelled = false;
+    setFundingAccountLoading(true);
+    getFundingAccount()
+      .then((account) => {
+        if (!cancelled) setFundingAccount(account);
+      })
+      .catch((error) => {
+        if (!cancelled && !(error instanceof ApiError && error.code === "DVA_CONSENT_REQUIRED")) {
+          setFundingAccountMessage(
+            customerMessage(error, "Your permanent funding account is not available yet. Please try again shortly."),
+          );
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setFundingAccountLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -177,31 +196,35 @@ export default function Page() {
     }
   }
 
-  async function fund(event: React.FormEvent) {
-    event.preventDefault();
-    if (!Number.isFinite(fundAmount) || fundAmount < 100) return;
+  async function checkRecentTransfer() {
+    if (fundingAccount?.status !== "ACTIVE" || !fundingAccount.accountNumber) {
+      setFundMessage("Your permanent funding account is not available yet. Please prepare it above before checking for a transfer.");
+      return;
+    }
 
     setFundLoading(true);
-    setFundMessage("");
-    setCheckoutUrl("");
+    setFundMessage("Checking for your recent transfer…");
     try {
-      const result = await initializeFunding(fundAmount, getOrCreateActionIdempotencyKey("funding"));
-      clearActionIdempotencyKey("funding");
-      if (result.checkoutUrl) {
-        setCheckoutUrl(result.checkoutUrl);
+      const result = await reconcileFunding();
+      await refreshWallet();
+      if (result.credited.length > 0) {
+        const creditedAmount = result.credited.reduce(
+          (total, item) => total + Number(item.amount || 0),
+          0,
+        );
         setFundMessage(
-          "Your secure checkout is ready. Complete payment, then return to TEKSUM for verification.",
+          `Wallet funded successfully with ${formatNaira(creditedAmount)}.`,
         );
       } else {
         setFundMessage(
-          "Funding was initialized. Check Transactions for the latest status.",
+          "No new transfer has been confirmed yet. If you have already transferred money, please check again shortly.",
         );
       }
     } catch (error) {
       setFundMessage(
         customerMessage(
           error,
-          "We couldn't initialize wallet funding right now. Please try again shortly.",
+          "We couldn't check your recent transfer right now. Please try again shortly.",
         ),
       );
     } finally {
@@ -457,50 +480,24 @@ export default function Page() {
             <div className="mt-6 rounded-2xl bg-muted/50 p-5">
               <p className="text-sm font-bold">Add money to your wallet</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Choose an amount, complete the secure checkout, and TEKSUM will
-                verify the payment before crediting your wallet.
+                Transfer any amount to your permanent funding account above. Your wallet will be credited after the transfer is confirmed.
               </p>
-              <form
-                onSubmit={fund}
-                className="mt-4 flex flex-col gap-2 sm:flex-row"
+              <Button
+                type="button"
+                onClick={checkRecentTransfer}
+                disabled={fundLoading}
+                className="mt-4 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
               >
-                <Input
-                  type="number"
-                  min={100}
-                  max={10000000}
-                  step="0.01"
-                  value={fundAmount}
-                  onChange={(event) =>
-                    setFundAmount(Number(event.target.value))
-                  }
-                />
-                <Button
-                  type="submit"
-                  disabled={fundLoading || fundAmount < 100}
-                  className="rounded-xl bg-emerald-600 text-white hover:bg-emerald-700"
-                >
-                  {fundLoading ? (
-                    <Loader2 className="animate-spin" />
-                  ) : (
-                    "Fund wallet"
-                  )}
-                </Button>
-              </form>
+                {fundLoading ? (
+                  <Loader2 className="animate-spin" />
+                ) : (
+                  "Check for a recent transfer"
+                )}
+              </Button>
               {fundMessage && (
                 <p className="mt-3 rounded-xl border bg-background p-3 text-sm">
                   {fundMessage}
                 </p>
-              )}
-              {checkoutUrl && (
-                <Button
-                  className="mt-3"
-                  variant="outline"
-                  render={
-                    <a href={checkoutUrl} target="_blank" rel="noreferrer" />
-                  }
-                >
-                  Open secure checkout <ExternalLink />
-                </Button>
               )}
             </div>
           </CardContent>
