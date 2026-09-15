@@ -2,7 +2,7 @@
 import { FormEvent, useState } from "react";
 import Link from "next/link";
 import { BrandMark } from "@/components/brand-mark";
-import { Loader2, UserRound } from "lucide-react";
+import { Eye, EyeOff, Loader2, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiFetch, customerMessage } from "@/lib/teksum-api";
@@ -13,6 +13,8 @@ export function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
@@ -102,23 +104,49 @@ export function SignUpPage() {
               </div>
               <div>
                 <label className="mb-2 block text-sm">Password</label>
-                <Input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  minLength={12}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    minLength={12}
+                    required
+                    className="pr-10"
+                    aria-label="Password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((value) => !value)}
+                    className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    title={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="mb-2 block text-sm">Confirm password</label>
-                <Input
-                  type="password"
-                  value={confirm}
-                  onChange={(e) => setConfirm(e.target.value)}
-                  minLength={12}
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    type={showConfirm ? "text" : "password"}
+                    value={confirm}
+                    onChange={(e) => setConfirm(e.target.value)}
+                    minLength={12}
+                    required
+                    className="pr-10"
+                    aria-label="Confirm password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirm((value) => !value)}
+                    className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
+                    aria-label={showConfirm ? "Hide confirmation password" : "Show confirmation password"}
+                    title={showConfirm ? "Hide password" : "Show password"}
+                  >
+                    {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+                  </button>
+                </div>
               </div>
               {error && (
                 <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
