@@ -1,6 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { CheckCircle2, Info, Loader2, XCircle } from "lucide-react";
 
 export type CustomerFeedbackVariant = "error" | "success" | "info";
@@ -29,10 +30,20 @@ export function CustomerFeedback({
   variant,
   action,
 }: CustomerFeedbackProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const visible = loading || Boolean(message);
   const activeVariant = loading ? "info" : variant ?? (message ? inferVariant(message) : "info");
 
-  return (
+  if (!mounted || !visible) {
+    return null;
+  }
+
+  return createPortal(
     <div
       aria-live={activeVariant === "error" ? "assertive" : "polite"}
       aria-atomic="true"
@@ -97,6 +108,7 @@ export function CustomerFeedback({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
