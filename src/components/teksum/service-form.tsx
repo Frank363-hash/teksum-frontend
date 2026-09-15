@@ -1,4 +1,5 @@
 "use client";
+import { CustomerFeedback } from "@/components/teksum/customer-feedback";
 
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
@@ -938,6 +939,26 @@ export function ServiceForm({
         </div>
       </CardHeader>
       <CardContent>
+        <CustomerFeedback
+          message={message}
+          loading={loading}
+          loadingTitle="Processing your purchase…"
+          loadingMessage="Your request has been submitted and is being processed. Please wait and do not close or refresh this page."
+          action={
+            verificationRequired ? (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="pointer-events-auto gap-1.5"
+                render={<Link href={`/verify-email?email=${encodeURIComponent(profileEmail || "")}&redirect=${encodeURIComponent(pathname || "/dashboard")}`} />}
+              >
+                <MailCheck className="size-3.5" />
+                Verify email
+              </Button>
+            ) : null
+          }
+        />
         {purchaseResult ? (
           <PurchaseResultView
             result={purchaseResult}
@@ -1329,23 +1350,6 @@ export function ServiceForm({
               </Button>
             </div>
 
-            {message && (
-              <div className="rounded-xl border bg-muted/50 p-3 text-sm">
-                <p>{message}</p>
-                {verificationRequired && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="mt-3 gap-1.5"
-                    render={<Link href={`/verify-email?email=${encodeURIComponent(profileEmail || "")}&redirect=${encodeURIComponent(pathname || "/dashboard")}`} />}
-                  >
-                    <MailCheck className="size-3.5" />
-                    Verify email
-                  </Button>
-                )}
-              </div>
-            )}
           </form>
         ) : (
           <div className="space-y-5">
@@ -1409,23 +1413,6 @@ export function ServiceForm({
               />
             </div>
 
-            {loading && (
-              <div
-                role="status"
-                aria-live="polite"
-                className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[.06] p-4"
-              >
-                <div className="flex items-start gap-3">
-                  <Loader2 className="mt-0.5 size-5 shrink-0 animate-spin text-emerald-500" />
-                  <div className="min-w-0">
-                    <p className="font-semibold">Processing your purchase...</p>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Your request has been submitted and is being processed. Please wait and do not close or refresh this page.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
@@ -1446,10 +1433,7 @@ export function ServiceForm({
                 className="bg-emerald-600 text-white hover:bg-emerald-700"
               >
                 {loading ? (
-                  <>
-                    <Loader2 className="animate-spin" />
-                    Processing purchase...
-                  </>
+                  <Loader2 className="animate-spin" aria-label="Processing" />
                 ) : (
                   "Confirm & purchase"
                 )}

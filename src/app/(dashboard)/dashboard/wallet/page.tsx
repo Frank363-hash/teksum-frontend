@@ -1,4 +1,5 @@
 "use client";
+import { CustomerFeedback } from "@/components/teksum/customer-feedback";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -407,7 +408,37 @@ export default function Page() {
     }
   }
 
+  const customerFeedbackMessage =
+    withdrawLoading
+      ? "Your withdrawal request has been submitted and is being processed. Please wait and do not close or refresh this page."
+      : verifyingAccount
+        ? "Verifying your bank account…"
+        : fundLoading
+          ? "Checking for your recent transfer…"
+          : withdrawMessage || fundMessage || fundingAccountMessage || "";
+
+  const customerFeedbackVariant =
+    withdrawMessage && /verified\.\s*review/i.test(withdrawMessage)
+      ? "success"
+      : fundMessage && /successfully/i.test(fundMessage)
+        ? "success"
+        : "error";
+
   return (
+    <>
+      <CustomerFeedback
+        message={customerFeedbackMessage}
+        loading={withdrawLoading || verifyingAccount || fundLoading}
+        variant={customerFeedbackVariant}
+        loadingTitle={
+          withdrawLoading
+            ? "Processing your withdrawal…"
+            : verifyingAccount
+              ? "Verifying bank account…"
+              : "Checking your wallet funding…"
+        }
+        loadingMessage="Please wait and do not close or refresh this page."
+      />
     <div className="teksum-dashboard-page min-w-0 w-full grid gap-6 xl:grid-cols-[1.1fr_.9fr]">
       <div className="space-y-6">
         <Card className="rounded-2xl">
@@ -470,9 +501,6 @@ export default function Page() {
                   {fundingAccount?.status === "PENDING" && (
                     <p className="text-xs text-muted-foreground">Your permanent funding account is still being assigned. You can check again later.</p>
                   )}
-                  {fundingAccountMessage && (
-                    <p className="rounded-xl border bg-background p-3 text-sm">{fundingAccountMessage}</p>
-                  )}
                 </div>
               )}
             </div>
@@ -494,11 +522,6 @@ export default function Page() {
                   "Check for a recent transfer"
                 )}
               </Button>
-              {fundMessage && (
-                <p className="mt-3 rounded-xl border bg-background p-3 text-sm">
-                  {fundMessage}
-                </p>
-              )}
             </div>
           </CardContent>
         </Card>
@@ -663,9 +686,6 @@ export default function Page() {
                       Review withdrawal
                     </Button>
 
-                    {withdrawMessage && (
-                      <p className="rounded-xl border bg-muted/30 p-3 text-sm">{withdrawMessage}</p>
-                    )}
                   </div>
                 )}
 
@@ -805,9 +825,6 @@ export default function Page() {
                       </Button>
                     </div>
 
-                    {withdrawMessage && (
-                      <p className="rounded-xl border bg-muted/30 p-3 text-sm">{withdrawMessage}</p>
-                    )}
                   </form>
                 )}
 
@@ -896,5 +913,6 @@ export default function Page() {
         </CardContent>
       </Card>
     </div>
+    </>
   );
 }
