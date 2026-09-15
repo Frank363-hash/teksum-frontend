@@ -2,6 +2,7 @@
 import { FormEvent, Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { BrandMark } from "@/components/brand-mark";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,8 @@ function ResetForm() {
   const [otp, setOtp] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [message, setMessage] = useState("");
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -51,22 +54,18 @@ function ResetForm() {
         placeholder="6-digit code"
         required
       />
-      <Input
-        type="password"
-        minLength={12}
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="New password"
-        required
-      />
-      <Input
-        type="password"
-        minLength={12}
-        value={confirm}
-        onChange={(e) => setConfirm(e.target.value)}
-        placeholder="Confirm new password"
-        required
-      />
+      <div className="relative">
+        <Input type={showPassword ? "text" : "password"} minLength={12} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="New password" required className="pr-10" aria-label="New password" />
+        <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground" aria-label={showPassword ? "Hide new password" : "Show new password"} title={showPassword ? "Hide password" : "Show password"}>
+          {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </button>
+      </div>
+      <div className="relative">
+        <Input type={showConfirm ? "text" : "password"} minLength={12} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Confirm new password" required className="pr-10" aria-label="Confirm new password" />
+        <button type="button" onClick={() => setShowConfirm((value) => !value)} className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground" aria-label={showConfirm ? "Hide confirmation password" : "Show confirmation password"} title={showConfirm ? "Hide password" : "Show password"}>
+          {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </button>
+      </div>
       {message && <p className="text-sm text-muted-foreground">{message}</p>}
       <Button type="submit" className="w-full bg-emerald-500 text-black">
         Reset password

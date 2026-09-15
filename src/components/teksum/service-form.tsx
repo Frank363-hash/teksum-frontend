@@ -761,6 +761,23 @@ export function ServiceForm({
       setReview(false);
     } catch (error) {
       const code = error instanceof ApiError ? error.code : undefined;
+
+      // A deterministic rejection means this is a new purchase attempt
+      // (for example an invalid PIN, insufficient funds, validation error,
+      // or idempotency conflict). Discard the old key so corrected input
+      // receives a fresh idempotency key.
+      //
+      // Keep the key for 425/5xx/network failures because the outcome may
+      // be uncertain and retrying must remain idempotent.
+      if (
+        error instanceof ApiError &&
+        error.status >= 400 &&
+        error.status < 500 &&
+        error.status !== 425
+      ) {
+        clearActionIdempotencyKey("purchase");
+      }
+
       setVerificationRequired(code === "EMAIL_VERIFICATION_REQUIRED");
       setMessage(
         customerMessage(
