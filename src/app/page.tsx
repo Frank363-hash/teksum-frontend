@@ -27,49 +27,49 @@ const services = [
   [
     "data",
     "Data",
-    "The bundle you need. Right number. Right now.",
+    "Choose an available bundle for your number.",
     Radio,
     "/images/services/data.webp",
   ],
   [
     "airtime",
     "Airtime",
-    "Top up and get on with your day.",
+    "Top up a supported Nigerian number.",
     Smartphone,
     "/images/services/airtime.webp",
   ],
   [
     "education",
     "Education",
-    "Get the PIN. Keep moving.",
+    "Buy an available education PIN.",
     GraduationCap,
     "/images/services/education.webp",
   ],
   [
     "cable",
     "Cable TV",
-    "Renew your TV before the next programme starts.",
+    "Renew a supported TV subscription from your wallet.",
     Tv,
     "/images/services/cable.webp",
   ],
   [
     "power",
     "Electricity",
-    "Keep the lights on without the runaround.",
+    "Pay a supported electricity provider from your wallet.",
     Zap,
     "/images/services/electricity.webp",
   ],
   [
     "airtime-pin",
     "Airtime PIN",
-    "Recharge-card PINs available for purchase.",
+    "Buy available recharge-card PINs.",
     KeyRound,
     "/images/services/airtime-pin.webp",
   ],
   [
     "international-airtime",
     "International Airtime",
-    "International top-ups are coming soon.",
+    "International airtime is coming soon.",
     Globe2,
     "/images/services/international-airtime.webp",
   ],
@@ -87,11 +87,11 @@ export default function Home() {
                 Data • Airtime • Bills • Education
               </p>
               <h1 className="mt-4 max-w-3xl text-5xl font-black tracking-[-.045em] sm:text-6xl">
-                Buy Instant Data, Airtime & Exam PINs at Wholesale Rates.
+                Buy data, airtime, bills and exam PINs from one wallet.
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-8 text-foreground/60">
-                One wallet for everyday digital services. Explore what TEKSUM
-                supports, then sign in when you're ready to pay.
+                Browse available services, see current options, then sign in when you're
+                ready to pay.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button
@@ -99,7 +99,7 @@ export default function Home() {
                   className="rounded-xl bg-emerald-500 text-black hover:bg-emerald-400"
                   render={<Link href="/services" />}
                 >
-                  Explore services <ArrowRight />
+                  See available services <ArrowRight />
                 </Button>
                 <Button
                   size="lg"
@@ -107,7 +107,7 @@ export default function Home() {
                   className="rounded-xl border-border bg-background/70 text-foreground hover:bg-muted"
                   render={<Link href="/sign-up" />}
                 >
-                  Create account
+                  Create your account
                 </Button>
               </div>
               <div className="mt-8 flex flex-wrap gap-5 text-sm text-foreground/60">
@@ -128,10 +128,10 @@ export default function Home() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-500">
-                Get things done
+                Services
               </p>
               <h2 className="mt-2 text-3xl font-black tracking-tight">
-                The services you actually came for.
+                Choose the service you need.
               </h2>
             </div>
             <Link
@@ -204,9 +204,9 @@ export default function Home() {
         </section>
         <section className="mx-auto max-w-3xl px-5 py-16 lg:px-8">
           <p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-500">
-            Questions
+            Before you buy
           </p>
-          <h2 className="mt-2 text-3xl font-black">Before you get started.</h2>
+          <h2 className="mt-2 text-3xl font-black">Know what happens before you pay.</h2>
           <div className="mt-7 space-y-3">
             {[
               [

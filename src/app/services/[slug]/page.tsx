@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params
   if (slug === "international-airtime") {
     return {
-      title: "International Airtime — Coming Soon",
+      title: "International Airtime: Coming Soon",
       description: "International airtime is coming soon to TEKSUM.",
       alternates: { canonical: "/services/international-airtime" },
     }

@@ -13,7 +13,7 @@ import { PublicShell } from "@/components/public-shell"
 
 const services = [
   ["data", "Data", "MTN, Airtel, Glo and 9mobile bundles", "data", "/images/services/data.webp"],
-  ["airtime", "Airtime", "Instant recharge for Nigerian numbers", "airtime", "/images/services/airtime.webp"],
+  ["airtime", "Airtime", "Recharge supported Nigerian numbers", "airtime", "/images/services/airtime.webp"],
   ["education", "Education", "WAEC, NECO, NABTEB and JAMB products", "education", "/images/services/education.webp"],
   ["cable", "Cable TV", "DStv, GOtv, Startimes and supported services", "cable", "/images/services/cable.webp"],
   ["power", "Electricity", "Supported Nigerian electricity providers", "power", "/images/services/electricity.webp"],
