@@ -81,18 +81,18 @@ export function PublicPreview() {
           />
         </div>
         <p className="mt-3 text-xs leading-5 text-muted-foreground">
-          Purchase prices are confirmed after you sign in. We do not display made-up prices when a current rate is unavailable.
+          Purchase prices are confirmed after you sign in. We do not display made-up prices.
         </p>
       </div>
       <Button
         className="mt-5 w-full rounded-xl bg-emerald-500 text-black hover:bg-emerald-400"
         render={
           <Link
-            href={`/services/${selected === "DATA" ? "data" : selected === "AIRTIME" ? "airtime" : selected === "EDUCATION" ? "exam-pins" : selected === "CABLE" ? "cable" : "power"}`}
+            href="/services"
           />
         }
       >
-        View service <ArrowRight />
+        View all services <ArrowRight />
       </Button>
     </Card>
   );
