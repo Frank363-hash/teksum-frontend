@@ -4,6 +4,7 @@ import { CustomerFeedback } from "@/components/teksum/customer-feedback";
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { educationProviders as educationProviderCatalog } from "@/components/teksum/service-discovery";
 import { CheckCircle2, Loader2, ShieldCheck, MailCheck } from "lucide-react";
@@ -813,10 +814,12 @@ export function ServiceForm({
                 className={`rounded-2xl border p-4 text-left text-sm font-semibold transition ${network === value ? "border-emerald-500 bg-emerald-500/10 ring-2 ring-emerald-500/10" : "hover:bg-muted"}`}
               >
                 <span className="flex items-center gap-3">
-                  <img
+                  <Image
                     src={providerImages[value]}
                     alt=""
                     aria-hidden="true"
+                    width={32}
+                    height={32}
                     className="size-8 shrink-0 object-contain"
                     onError={(event) => {
                       event.currentTarget.style.display = "none";
@@ -1012,10 +1015,12 @@ export function ServiceForm({
                       className={`rounded-2xl border p-3 text-sm font-semibold transition ${network === value ? "border-emerald-500 bg-emerald-500/10 ring-2 ring-emerald-500/10" : "hover:bg-muted"}`}
                     >
                       <span className="flex items-center gap-3">
-                        <img
+                        <Image
                           src={providerImages[value]}
                           alt=""
                           aria-hidden="true"
+                          width={32}
+                          height={32}
                           className="size-8 shrink-0 object-contain"
                           onError={(event) => {
                             event.currentTarget.style.display = "none";
@@ -1033,10 +1038,12 @@ export function ServiceForm({
                       className={`rounded-2xl border p-3 text-sm font-semibold transition ${network === value ? "border-emerald-500 bg-emerald-500/10 ring-2 ring-emerald-500/10" : "hover:bg-muted"}`}
                     >
                       <span className="flex items-center gap-3">
-                        <img
+                        <Image
                           src={providerImages[value]}
                           alt=""
                           aria-hidden="true"
+                          width={32}
+                          height={32}
                           className="size-8 shrink-0 object-contain"
                           onError={(event) => {
                             event.currentTarget.style.display = "none";

@@ -20,7 +20,7 @@ export default function robots(): MetadataRoute.Robots {
         "/settings",
       ],
     },
-    sitemap: "https://teksum.ng/sitemap.xml",
-    host: "https://teksum.ng",
+    sitemap: "https://www.teksum.org/sitemap.xml",
+    host: "https://www.teksum.org",
   };
 }

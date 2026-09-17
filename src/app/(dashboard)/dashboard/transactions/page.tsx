@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowUpRight, CheckCircle2, Clock3, XCircle } from "lucide-react";
+import { ArrowUpRight, CheckCircle2, ChevronLeft, ChevronRight, Clock3, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   getTransactions,
@@ -37,17 +38,26 @@ function Status({ status }: { status: string }) {
 export default function Page() {
   const [tx, setTx] = useState<Transaction[]>([]);
   const [status, setStatus] = useState("");
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
   const [error, setError] = useState("");
   useEffect(() => {
     setError("");
-    getTransactions(status ? `limit=50&status=${status}` : "limit=50")
-      .then((r) => setTx(r.items))
+    const query = new URLSearchParams({ page: String(page), limit: "20" });
+    if (status) query.set("status", status);
+    getTransactions(query.toString())
+      .then((r) => {
+        setTx(r.items);
+        setPages(Math.max(1, r.pagination.pages));
+        setTotal(r.pagination.total);
+      })
       .catch((e) =>
         setError(
           customerMessage(e, "We couldn't load your transactions right now."),
         ),
       );
-  }, [status]);
+  }, [status, page]);
   return (
     <div className="teksum-dashboard-page min-w-0 w-full">
       <Card className="min-w-0 overflow-hidden rounded-2xl">
@@ -144,6 +154,37 @@ export default function Page() {
               </p>
             )}
           </div>
+          {pages > 1 && (
+            <div className="mt-5 flex flex-col gap-3 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs text-muted-foreground">
+                Page {page} of {pages} · {total.toLocaleString("en-NG")} transactions
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  aria-label="Previous transactions page"
+                >
+                  <ChevronLeft className="size-4" />
+                  Previous
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  disabled={page >= pages}
+                  onClick={() => setPage((current) => Math.min(pages, current + 1))}
+                  aria-label="Next transactions page"
+                >
+                  Next
+                  <ChevronRight className="size-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

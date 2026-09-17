@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://teksum.ng"),
+  metadataBase: new URL("https://www.teksum.org"),
   title: {
     default: "TEKSUM Data, Airtime, Bills & Exam PINs",
     template: "%s | TEKSUM",
@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     description:
       "Buy data, airtime, exam PINs and supported Nigerian bills through TEKSUM.",
     type: "website",
-    url: "https://teksum.ng/",
+    url: "https://www.teksum.org/",
     siteName: "TEKSUM",
     locale: "en_NG",
   },

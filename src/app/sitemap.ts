@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const baseUrl = "https://teksum.ng";
+const baseUrl = "https://www.teksum.org";
 
 const publicRoutes = [
   "/",
