@@ -19,8 +19,18 @@ function ResetForm() {
   const [message, setMessage] = useState("");
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (password.length < 12)
-      return setMessage("Password must be at least 12 characters.");
+    if (password.length < 8)
+      return setMessage("Password must be at least 8 characters.");
+    if (password.length > 128)
+      return setMessage("Password must be 128 characters or fewer.");
+    if (!/[a-z]/.test(password))
+      return setMessage("Password must contain at least one lowercase letter.");
+    if (!/[A-Z]/.test(password))
+      return setMessage("Password must contain at least one uppercase letter.");
+    if (!/\d/.test(password))
+      return setMessage("Password must contain at least one number.");
+    if (!/[^A-Za-z0-9]/.test(password))
+      return setMessage("Password must contain at least one symbol.");
     if (password !== confirm) return setMessage("Passwords do not match.");
     try {
       await apiFetch(
@@ -55,17 +65,20 @@ function ResetForm() {
         required
       />
       <div className="relative">
-        <Input type={showPassword ? "text" : "password"} minLength={12} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="New password" required className="pr-10" aria-label="New password" />
+        <Input type={showPassword ? "text" : "password"} minLength={8} maxLength={128} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="New password" required className="pr-10" aria-label="New password" />
         <button type="button" onClick={() => setShowPassword((value) => !value)} className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground" aria-label={showPassword ? "Hide new password" : "Show new password"} title={showPassword ? "Hide password" : "Show password"}>
           {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </button>
       </div>
       <div className="relative">
-        <Input type={showConfirm ? "text" : "password"} minLength={12} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Confirm new password" required className="pr-10" aria-label="Confirm new password" />
+        <Input type={showConfirm ? "text" : "password"} minLength={8} maxLength={128} value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Confirm new password" required className="pr-10" aria-label="Confirm new password" />
         <button type="button" onClick={() => setShowConfirm((value) => !value)} className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground" aria-label={showConfirm ? "Hide confirmation password" : "Show confirmation password"} title={showConfirm ? "Hide password" : "Show password"}>
           {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </button>
       </div>
+      <p className="rounded-xl border border-white/10 bg-white/[.03] p-3 text-xs leading-5 text-white/50">
+        Use 8–128 characters with at least one lowercase letter, one uppercase letter, one number, and one symbol.
+      </p>
       {message && <p className="text-sm text-muted-foreground">{message}</p>}
       <Button type="submit" className="w-full bg-emerald-500 text-black">
         Reset password

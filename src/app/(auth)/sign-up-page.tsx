@@ -23,8 +23,18 @@ export function SignUpPage() {
   ).get("redirect");
   async function submit(e: FormEvent) {
     e.preventDefault();
-    if (password.length < 12)
-      return setError("Password must be at least 12 characters.");
+    if (password.length < 8)
+      return setError("Password must be at least 8 characters.");
+    if (password.length > 128)
+      return setError("Password must be 128 characters or fewer.");
+    if (!/[a-z]/.test(password))
+      return setError("Password must contain at least one lowercase letter.");
+    if (!/[A-Z]/.test(password))
+      return setError("Password must contain at least one uppercase letter.");
+    if (!/\d/.test(password))
+      return setError("Password must contain at least one number.");
+    if (!/[^A-Za-z0-9]/.test(password))
+      return setError("Password must contain at least one symbol.");
     if (password !== confirm) return setError("Passwords do not match.");
     setBusy(true);
     setError("");
@@ -109,7 +119,8 @@ export function SignUpPage() {
                     type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    minLength={12}
+                    minLength={8}
+                    maxLength={128}
                     required
                     className="pr-10"
                     aria-label="Password"
@@ -132,7 +143,8 @@ export function SignUpPage() {
                     type={showConfirm ? "text" : "password"}
                     value={confirm}
                     onChange={(e) => setConfirm(e.target.value)}
-                    minLength={12}
+                    minLength={8}
+                    maxLength={128}
                     required
                     className="pr-10"
                     aria-label="Confirm password"
@@ -148,6 +160,9 @@ export function SignUpPage() {
                   </button>
                 </div>
               </div>
+              <p className="rounded-xl border bg-muted/30 p-3 text-xs leading-5 text-muted-foreground">
+                Use 8–128 characters with at least one lowercase letter, one uppercase letter, one number, and one symbol.
+              </p>
               {error && (
                 <p className="rounded-xl bg-destructive/10 p-3 text-sm text-destructive">
                   {error}
