@@ -16,6 +16,8 @@ import {
   getCapabilities,
   getPlans,
   getPricingRules,
+  getSmsQuote,
+  type SmsQuote,
   getProfile,
   getSecurity,
   type Plan,
@@ -291,6 +293,8 @@ export function ServiceForm({
   const [status, setStatus] = useState("");
   const [capabilities, setCapabilities] = useState<unknown[]>([]);
   const [rule, setRule] = useState<Rule | null>(null);
+  const [smsQuote, setSmsQuote] = useState<SmsQuote | null>(null);
+  const [smsQuoteLoading, setSmsQuoteLoading] = useState(false);
   const [review, setReview] = useState(false);
   const [purchaseResult, setPurchaseResult] =
     useState<Awaited<ReturnType<typeof purchase>> | null>(null);
@@ -363,6 +367,7 @@ export function ServiceForm({
     setMessage("");
     setReview(false);
     setPurchaseResult(null);
+    setSmsQuote(null);
 
     if (category === "ELECTRICITY" && !network) {
       setPlans([]);
@@ -480,6 +485,37 @@ export function ServiceForm({
           Number(rule.fixedFee)
         : null
       : Number(selected?.sellingPrice || 0) * quantity;
+
+  const smsQuantity =
+    !dynamic && selected?.supportsBulk ? quantity : 1;
+  const smsFee = Number(smsQuote?.smsFee || 0);
+  const reviewTotal =
+    estimatedTotal === null ? null : estimatedTotal + smsFee;
+
+  async function loadSmsQuote(): Promise<boolean> {
+    setSmsQuoteLoading(true);
+    setSmsQuote(null);
+    try {
+      const quote = await getSmsQuote({
+        planId: dynamic ? "AMOUNT" : planId,
+        networkProvider: network,
+        category,
+        quantity: smsQuantity,
+      });
+      setSmsQuote(quote);
+      return true;
+    } catch (error) {
+      setMessage(
+        customerMessage(
+          error,
+          "We couldn't confirm the notification charge right now. Please try again shortly.",
+        ),
+      );
+      return false;
+    } finally {
+      setSmsQuoteLoading(false);
+    }
+  }
 
   function validate() {
     if (!authenticated) return false;
@@ -641,7 +677,7 @@ export function ServiceForm({
     if (category === "CABLE" || category === "ELECTRICITY") {
       if (!customerVerificationKey) return;
       if (verifiedKey === customerVerificationKey && verification) {
-        setReview(true);
+        if (await loadSmsQuote()) setReview(true);
         return;
       }
 
@@ -681,6 +717,7 @@ export function ServiceForm({
         setMessage(
           "Customer details verified. You can now review the purchase.",
         );
+        if (await loadSmsQuote()) setReview(true);
       } catch (error) {
         const code = error instanceof ApiError ? error.code : undefined;
         if (code === "CUSTOMER_VERIFICATION_FAILED") {
@@ -705,7 +742,7 @@ export function ServiceForm({
       return;
     }
 
-    setReview(true);
+    if (await loadSmsQuote()) setReview(true);
   }
 
   async function confirmPurchase() {
@@ -932,7 +969,17 @@ export function ServiceForm({
     "Quantity",
     !dynamic && selected?.supportsBulk ? String(quantity) : "1",
   ]);
-  reviewDetails.push(["Total", estimatedTotal === null ? "—" : formatNaira(estimatedTotal)]);
+  reviewDetails.push([
+    "Service amount",
+    estimatedTotal === null ? "—" : formatNaira(estimatedTotal),
+  ]);
+  if (smsFee > 0) {
+    reviewDetails.push(["SMS notification", formatNaira(smsFee)]);
+  }
+  reviewDetails.push([
+    "Total",
+    reviewTotal === null ? "—" : formatNaira(reviewTotal),
+  ]);
 
   return (
     <Card className="mx-auto w-full min-w-0 max-w-5xl rounded-2xl shadow-sm">
@@ -1137,9 +1184,7 @@ export function ServiceForm({
                   placeholder="Enter amount"
                 />
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Allowed range: {formatNaira(dynamicMin)} –{" "}
-                  {formatNaira(dynamicMax)}
-                  {rule?.description ? ` • ${rule.description}` : ""}
+                  Enter an amount between {formatNaira(dynamicMin)} and {formatNaira(dynamicMax)}.
                 </p>
               </div>
             )}
@@ -1352,7 +1397,10 @@ export function ServiceForm({
               <Button
                 type="submit"
                 disabled={
-                  loadingPlans || verificationLoading || (!dynamic && !selected)
+                  loadingPlans ||
+                  verificationLoading ||
+                  smsQuoteLoading ||
+                  (!dynamic && !selected)
                 }
                 size="lg"
                 className="w-full shrink-0 rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 sm:w-auto"
@@ -1361,6 +1409,11 @@ export function ServiceForm({
                   <>
                     <Loader2 className="animate-spin" />
                     Verifying customer...
+                  </>
+                ) : smsQuoteLoading ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    Checking notification...
                   </>
                 ) : category === "CABLE" || category === "ELECTRICITY" ? (
                   customerVerified ? (

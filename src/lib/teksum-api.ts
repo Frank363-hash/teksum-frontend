@@ -214,6 +214,28 @@ export type Plan = {
   description: string | null;
 };
 
+export type SmsQuote = {
+  eligible: boolean;
+  estimatedSegments: number;
+  smsFee: string;
+  currency: string;
+};
+
+export const getSmsQuote = (input: {
+  planId: string;
+  networkProvider: string;
+  category: string;
+  quantity?: number;
+}) => {
+  const params = new URLSearchParams({
+    planId: input.planId,
+    networkProvider: input.networkProvider,
+    category: input.category,
+    quantity: String(input.quantity ?? 1),
+  });
+  return apiFetch<SmsQuote>(`/vending/sms/quote?${params}`);
+};
+
 export const getPlans = (category?: string, network?: string) => {
   const params = new URLSearchParams();
   if (category) params.set("category", category);
