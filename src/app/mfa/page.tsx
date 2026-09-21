@@ -5,6 +5,7 @@ import { Loader2, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiFetch, customerMessage } from "@/lib/teksum-api";
+import { BrandMark } from "@/components/brand-mark";
 
 export default function MfaPage() {
   const [challenge, setChallenge] = useState("");
@@ -53,8 +54,9 @@ export default function MfaPage() {
   return (
     <main className="grid min-h-svh min-w-0 lg:grid-cols-2">
       <div className="hidden min-w-0 bg-zinc-950 p-10 text-white lg:flex lg:flex-col lg:justify-between">
-        <Link href="/" className="font-black">
-          TEKSUM
+        <Link href="/" className="flex items-center gap-2 font-black">
+          <BrandMark className="size-9" />
+          <span>TEKSUM</span>
         </Link>
         <div className="max-w-md">
           <ShieldCheck className="size-10 text-emerald-400" />
@@ -70,9 +72,10 @@ export default function MfaPage() {
         <div className="w-full min-w-0 max-w-sm">
           <Link
             href="/"
-            className="mb-10 flex items-center justify-center font-black lg:hidden"
+            className="mb-10 flex items-center justify-center gap-2 font-black lg:hidden"
           >
-            TEKSUM
+            <BrandMark className="size-8" />
+            <span>TEKSUM</span>
           </Link>
           <div className="w-full min-w-0 rounded-3xl border bg-card p-5 sm:p-7">
             <p className="text-xs font-bold uppercase tracking-[.18em] text-emerald-500">

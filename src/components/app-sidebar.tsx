@@ -90,7 +90,7 @@ export function AppSidebar(props: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuButton
                   isActive={
                     pathname === url ||
-                    (url !== "/dashboard" && pathname.startsWith(url))
+                    (url !== "/dashboard" && pathname.startsWith(`${url}/`))
                   }
                   tooltip={title}
                   render={<Link href={url} />}
